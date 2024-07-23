@@ -25,7 +25,7 @@ import { getAllJobs } from './actions/JobActions'
 import { JobsLayout } from './pages/JobsLayout'
 import { Application } from './pages/Application'
 import { ApplicationDetails } from './pages/ApplicationDetails'
-import { ViewAllJobAdmin } from './pages/VIewAllJobAdmin'
+import { ViewAllJobAdmin } from './pages/ViewAllJobAdmin'
 import { ViewAllAppli } from './pages/ViewAllAppli'
 import { ViewAllUsersAdmin } from './pages/ViewAllUsersAdmin'
 import { EditAppAdmin } from './pages/EditAppAdmin'
@@ -36,48 +36,35 @@ import NotFound from './pages/NotFound'
 import UnAuthorized from './pages/UnAuthorized'
 import ScrollToTopWhenRouteChanges from './components/ScrollToTopOnRouteChange.jsx'
 
-
+function ProtectedRoute({ isAllowed, redirectPath = '/unauthorized', children }) {
+  if (!isAllowed) {
+    return <Navigate to={redirectPath} replace />;
+  }
+  return children ? children : <Outlet />
+}
 
 function App() {
-
   const dispatch = useDispatch()
-
-
   const { isLogin } = useSelector(state => state.user)
 
-
   useEffect(() => {
-
     dispatch(me());
-
-  }, [dispatch, isLogin]);
-
+  }, [dispatch]);
 
   useEffect(() => {
-    const LogOrNot = () => {
+    const logOrNotAndFetchJobs = () => {
       dispatch(logOrNot());
-      dispatch(getAllJobs())
+      dispatch(getAllJobs());
     }
-    LogOrNot()
-
-  }, []);
-
-  const ProtectedRoute = ({ isAllowed, redirectPath = '/unauthorized', children }) => {
-    if (!isAllowed) {
-      return <Navigate to={redirectPath} replace />;
-    }
-
-    return children ? children : <Outlet />
-  }
-
+    logOrNotAndFetchJobs();
+  }, [dispatch]);
 
   return (
     <>
-       <ScrollToTopWhenRouteChanges/>
+      <ScrollToTopWhenRouteChanges />
       <Navbar />
       <Routes>
-        
-        <Route exact path='/' element={<Home />} />
+        <Route path='/' element={<Home />} />
         <Route path='/jobs' element={<Jobs />} />
         <Route path='/contact' element={<Contact />} />
         <Route path='/about' element={<About />} />
@@ -95,7 +82,6 @@ function App() {
           <Route path='/JobsLayout' element={<JobsLayout />} />
           <Route path='/Application/:id' element={<Application />} />
           <Route path='/Application/Details/:id' element={<ApplicationDetails />} />
-
         </Route>
 
         <Route element={<ProtectedRoute isAllowed={"admin" === localStorage.getItem('role')} />}>
@@ -109,18 +95,10 @@ function App() {
           <Route path='/admin/job/details/:id' element={<EditJobAdmin />} />
         </Route>
 
-
-        {/* test */}
         <Route path='/test' element={<Test />} />
-
-
         <Route path='*' element={<NotFound />} />
         <Route path='/unauthorized' element={<UnAuthorized />} />
-
-
-
       </Routes>
-
 
       <ToastContainer
         position="top-right"
@@ -133,15 +111,10 @@ function App() {
         draggable
         pauseOnHover
         theme="dark"
-        className="mt-14 font-bold  "
-
+        className="mt-14 font-bold"
       />
 
       <Footer />
-
-
-
-
     </>
   )
 }

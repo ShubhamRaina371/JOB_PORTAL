@@ -1,20 +1,28 @@
-const app = require('./app')
-const databaseConnection = require('./config/database')
-const cloudinary  = require('cloudinary')
-const dotenv = require('dotenv')
-dotenv.config({path:"./config/config.env"})
+require('dotenv').config(); // Make sure this is the very first line
 
+const express = require('express');
+const mongoose = require('mongoose');
+const app = require('./app'); // Import your Express app
+const databaseConnection = require('./config/database'); // Database connection function
 
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_NAME ,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
-}) 
+console.log('Environment Variables:', process.env);
+console.log('Database URI:', process.env.DB);
+console.log('Server Port:', process.env.PORT);
 
-databaseConnection()
+const connectToDatabase = () => {
+    console.log('Connecting to database:', process.env.DB);
+    mongoose.connect(process.env.DB, { useNewUrlParser: true, useUnifiedTopology: true })
+        .then(() => {
+            console.log('Database connection successful');
+        })
+        .catch(err => {
+            console.error('Database connection error:', err);
+        });
+}
 
+connectToDatabase();
 
-
-app.listen(process.env.PORT,()=>{
-    console.log(`server is running on port ${process.env.PORT}`)
-})
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
